@@ -1,0 +1,108 @@
+// This function handles HTTP POST requests.
+function doPost(e) {
+  return handleRequest(e);
+}
+
+// This function processes the incoming POST request.
+function handleRequest(e) {
+  // Create a text output to be returned as the HTTP response.
+  const output = ContentService.createTextOutput();
+
+  // Extract the JSON string from the POST data.
+  const jsonString = e.postData.contents;
+
+  // Parse the JSON string into a JavaScript object.
+  const jsonData = JSON.parse(jsonString);
+
+  // Extract specific data from the parsed JSON.
+  const txt = jsonData.txt;
+  
+  const json = {
+    "invoiceNumber": "string",
+    "date": "string",
+    "dueDate": "string",
+    "invoiceTo": {
+      "name": "string",
+      "company": "string",
+    },
+    "project": "string",
+    "subtotal": "number",
+    "tax": "number",
+    "adjustments": "number",
+    "total": "number"
+  }
+
+
+  // Call the 'ai' function with the extracted data.
+  const result = ai(txt, json);
+
+  // Check if a callback parameter is provided in the request.
+  const callback = e.parameters.callback;
+  if (callback === undefined) {
+    // If no callback is provided, return the result as JSON.
+    output.setContent(JSON.stringify(result));
+  } else {
+    // If a callback is provided, return the result wrapped in the callback function.
+    output.setContent(callback + "(" + JSON.stringify(result) + ")");
+  }
+
+  // Set the MIME type of the response as JSON.
+  output.setMimeType(ContentService.MimeType.JSON);
+
+  // Return the response.
+  return output;
+}
+
+// This function performs some AI-related processing.
+function ai(txt, json) {
+  // GPT-3.5 and GPT-4 and other LLMs use text as inputs. Thus, we need to stringify the json object.
+  const jsonString = JSON.stringify(json)
+
+  // Generate a prompt based on the input data.
+  let prompt = "use the [text] extracted from an invoice using OCR. Structure it as a JSON object with the structure shown in the [JSON model].\n[text]=" + txt + "\n[JSON model] = "+ jsonString + "n\keep the same structure of the JSON as in the model, including the same keys.";
+
+  // Create a data object with the specified parameters.
+  const data = {
+    "model": "gpt-3.5-turbo-16k-0613", //"gpt-4-0613", //
+    "messages": [{"role": "user", "content": prompt}],
+    "temperature": .9
+  };
+
+  // Configure options for making an HTTP POST request to an API.
+  const options = {
+    'method': 'post',
+    'headers': { 'Authorization': 'Bearer OPENAI_API_KEY' },
+    'contentType': 'application/json',
+    'payload': JSON.stringify(data),
+    'muteHttpExceptions': true
+  };
+
+  // Define the URL for the API endpoint.
+  const url = "https://api.openai.com/v1/chat/completions";
+
+  try {
+    // Make an HTTP POST request to the API.
+    const response = UrlFetchApp.fetch(url, options);
+    
+    // Parse the response JSON.
+    const res = JSON.parse(response.getContentText());
+    console.log(res)
+
+    // Check for and handle any errors in the response.
+    if (res.error) {
+      console.log("Error: " + res.error.type + " message: " + res.error.message);
+      return res.error;
+    }
+
+    // Extract and trim the AI-generated content.
+    output = res.choices[0].message.content.trim();
+    
+    // Return the AI-generated output.
+
+    console.log(JSON.parse(output))
+    return JSON.parse(output);
+  } catch (error) {
+    console.log("Error: " + error);
+    return "An error occurred: " + error;
+  }
+}
