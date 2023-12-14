@@ -19,7 +19,7 @@ This book covers the following exciting features:
 If you feel this book is for you, get your [copy]([https://www.amazon.com/Essential-Guide-Creating-Multiplayer-Games-ebook/dp/B0C8TGXWXR](https://www.amazon.com/Unlocking-Secrets-Prompt-Engineering-generation-ebook/dp/B0CL4V6ZZK)https://www.amazon.com/Unlocking-Secrets-Prompt-Engineering-generation-ebook/dp/B0CL4V6ZZK) today!
 
 ## Instructions and Navigations
-All of the files is organized into folders. For example, chapter1.
+All of the files is organized into folders. For example, Chapter8.
 
 Unlocking the Secrets of Prompt Engineering is your key to mastering the art of AI-driven writing. This book propels you into the world of large language models (LLMs), empowering you to create and apply prompts effectively for diverse applications, from revolutionizing content creation and chatbots to coding assistance.
 
